@@ -19,6 +19,15 @@ final class MovieQuizViewController: UIViewController {
         let correctAnswer: Bool
     }
     
+    
+    @IBOutlet private var imageView: UIImageView!
+    @IBOutlet private var textLabel: UILabel!
+    @IBOutlet private var counterLabel: UILabel!
+    
+    @IBOutlet private var noButton: UIButton!
+    @IBOutlet private var yesButton: UIButton!
+    
+    
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
     private let questions: [QuizQuestion] =
@@ -62,6 +71,20 @@ final class MovieQuizViewController: UIViewController {
     }
     
     
+    @IBAction private func yesButtonClicked(_ sender: UIButton) {
+        let checkResult = questions[currentQuestionIndex].correctAnswer
+        showAnswerResult(isCorrect: checkResult)
+        yesButton.isEnabled = false
+        
+    }
+    
+    @IBAction private func noButtonClicked(_ sender: UIButton) {
+        let checkResult = !questions[currentQuestionIndex].correctAnswer
+        showAnswerResult(isCorrect: checkResult)
+        noButton.isEnabled = false
+    }
+    
+    
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         let viewModelOfQuestion = QuizStepViewModel(
             image: UIImage(named: model.image) ?? UIImage(),
@@ -72,12 +95,16 @@ final class MovieQuizViewController: UIViewController {
     
     private func show(view model: QuizStepViewModel){
         imageView.image = model.image
+        imageView.layer.cornerRadius = 20
         textLabel.text = model.question
         counterLabel.text = model.questionNumber
+        noButton.isEnabled = true
+        yesButton.isEnabled = true
     }
     
     private func showAnswerResult(isCorrect: Bool) {
         imageView.layer.masksToBounds = true
+        imageView.layer.cornerRadius = 20
         imageView.layer.borderWidth = 8
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         
@@ -121,22 +148,4 @@ final class MovieQuizViewController: UIViewController {
         
         self.present(alert, animated: true, completion: nil)
     }
-    
-    
-    @IBOutlet private var imageView: UIImageView!
-    @IBOutlet private var textLabel: UILabel!
-    @IBOutlet private var counterLabel: UILabel!
-    
-    @IBOutlet private var noButton: UIButton!
-    @IBAction private func noButtonClicked(_ sender: UIButton) {
-        let checkResult = questions[currentQuestionIndex].correctAnswer == false ? true : false
-        showAnswerResult(isCorrect: checkResult)
-    }
-    
-    @IBOutlet private var yesButton: UIButton!
-    @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        let checkResult = questions[currentQuestionIndex].correctAnswer == true ? true : false
-        showAnswerResult(isCorrect: checkResult)
-    }
 }
-
