@@ -1,6 +1,6 @@
 import UIKit
 
-class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
+final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - IBOutlet
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var textLabel: UILabel!
@@ -18,15 +18,16 @@ class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private var correctAnswers = 0
     
-    weak var delegate: AlertPresenterDelegate?
     private var alertPresenter: AlertPresenter?
+    private var statistic: StatisticServiceProtocol?
     
     // MARK: - UIViewController(*)
     override func viewDidLoad() {
         super.viewDidLoad()
+        statistic = StatisticService()
         
         alertPresenter = AlertPresenter()
-        self.delegate = alertPresenter
+        alertPresenter?.viewController = self
         
         questionFactory = QuestionFactory(delegate: self)
         questionFactory?.requestNextQuestion()
@@ -104,10 +105,15 @@ class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionsAmount - 1 {
+            statistic?.store(correct: self.correctAnswers)
+            
             let alertModel = AlertModel(title: "Этот раунд окончен!",
-                                        message: correctAnswers == questionsAmount ?
-                                        "Поздравляем, вы ответили на 10 из 10!" :
-                                            "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!",
+                                        message: """
+                                        Ваш результат: \(correctAnswers)/10
+                                        Количество сыгранных квизов: \(statistic?.gamesCount ?? 0)
+                                        Рекорд: \(statistic?.bestGame.correct ?? 0)/10 (\( statistic?.bestGame.date.dateTimeString ?? "Рекорда нет"))
+                                        Средняя точность: \(String(format: "%.2f", statistic?.totalAccuracy ?? 0))%
+                                        """,
                                         completion: { [weak self] in
                 guard let self = self else { return }
                 
@@ -116,7 +122,7 @@ class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                 
                 questionFactory?.requestNextQuestion()})
             
-            delegate?.didAlertModelCreated(model: alertModel)
+            alertPresenter?.didAlertModelCreated(model: alertModel)
         } else {
             currentQuestionIndex += 1
             

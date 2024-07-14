@@ -1,21 +1,25 @@
 import UIKit
 
-final class AlertPresenter: MovieQuizViewController, AlertPresenterDelegate {
+final class AlertPresenter {
+    // MARK: - Public Properties
+    weak var viewController: UIViewController?
     
-    
-    // MARK: - AlertPresenterDelegate
+    // MARK: - Public Methods
     func didAlertModelCreated(model: AlertModel?) {
         let alert = UIAlertController(
             title: model?.title,
             message: model?.message,
             preferredStyle: .alert)
         
-        let action = UIAlertAction(title: "Сыграть еще раз", style: .default)
+        let action = UIAlertAction(title: "Сыграть еще раз", style: .default,
+                                   handler: {_ in
+            model?.completion()
+        })
         
         alert.addAction(action)
         
         DispatchQueue.main.async {
-            self.present(alert, animated: true, completion: nil)
+            self.viewController?.present(alert, animated: true, completion: nil)
         }
     }
 }

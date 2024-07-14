@@ -1,14 +1,10 @@
 import Foundation
 
 final class QuestionFactory: QuestionFactoryProtocol {
+    // MARK: - Public Properties
     weak var delegate: QuestionFactoryDelegate?
     
-    
-    init(delegate: QuestionFactoryDelegate?) {
-        self.delegate = delegate
-    }
-    
-    
+    // MARK: - Private Properties
     private let questions: [QuizQuestion] =
     [QuizQuestion(image: "The Godfather",
                   text: "Рейтинг этого фильма больше чем 6?",
@@ -41,7 +37,12 @@ final class QuestionFactory: QuestionFactoryProtocol {
                   text: "Рейтинг этого фильма больше чем 6?",
                   correctAnswer: false)]
     
+    // MARK: - Initializers
+    init(delegate: QuestionFactoryDelegate?) {
+        self.delegate = delegate
+    }
     
+    // MARK: - Public Methods
     func requestNextQuestion() {
         guard let index = (0..<questions.count).randomElement() else {
             delegate?.didReceiveNextQuestion(question: nil)
