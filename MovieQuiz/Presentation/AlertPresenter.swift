@@ -2,7 +2,7 @@ import UIKit
 
 final class AlertPresenter {
     // MARK: - Public Properties
-    weak var viewController: UIViewController?
+    weak var delegate: AlertPresenterDelegate?
     
     // MARK: - Public Methods
     func didAlertModelCreated(model: AlertModel?) {
@@ -18,8 +18,6 @@ final class AlertPresenter {
         
         alert.addAction(action)
         
-        DispatchQueue.main.async {
-            self.viewController?.present(alert, animated: true, completion: nil)
-        }
+        delegate?.showAlert(alert)
     }
 }
