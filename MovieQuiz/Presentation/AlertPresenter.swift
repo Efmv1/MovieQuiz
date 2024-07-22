@@ -11,10 +11,7 @@ final class AlertPresenter {
             message: model?.message,
             preferredStyle: .alert)
         
-        let action = UIAlertAction(title: "Сыграть еще раз", style: .default,
-                                   handler: {_ in
-            model?.completion()
-        })
+        guard let action = model?.action else {return}
         
         alert.addAction(action)
         

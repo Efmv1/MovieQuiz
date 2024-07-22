@@ -9,6 +9,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     @IBOutlet private var noButton: UIButton!
     @IBOutlet private var yesButton: UIButton!
     
+    @IBOutlet private var activityIndicator: UIActivityIndicatorView!
+    
     
     // MARK: - Private Properties
     private let questionsAmount: Int = 10
@@ -29,8 +31,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         alertPresenter = AlertPresenter()
         alertPresenter?.delegate = self
         
-        questionFactory = QuestionFactory(delegate: self)
-        questionFactory?.requestNextQuestion()
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        questionFactory?.loadData()
+        showLoadingIndicator()
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -45,8 +48,17 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         }
     }
     
+    func didLoadDataFromServer() {
+        hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+    }
+
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription)
+    }
     
-    // MARK: - QuestionFactoryDelegate
+    
+    // MARK: - AlertPresenterDelegate
     func showAlert(_ alert: UIAlertController) {
         DispatchQueue.main.async {
             self.present(alert, animated: true, completion: nil)
@@ -80,7 +92,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     // MARK: - Private Methods
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         let viewModelOfQuestion = QuizStepViewModel(
-            image: UIImage(named: model.image) ?? UIImage(),
+            image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
         return viewModelOfQuestion
@@ -122,13 +134,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
                                         Рекорд: \(statistic?.bestGame.correct ?? 0)/10 (\( statistic?.bestGame.date.dateTimeString ?? "Рекорда нет"))
                                         Средняя точность: \(String(format: "%.2f", statistic?.totalAccuracy ?? 0))%
                                         """,
-                                        completion: { [weak self] in
+                                        action: UIAlertAction(title: "Сыграть еще раз", style: .default, handler: { [weak self] _ in
                 guard let self = self else { return }
                 
                 self.currentQuestionIndex = 0
                 self.correctAnswers = 0
                 
-                questionFactory?.requestNextQuestion()})
+                questionFactory?.requestNextQuestion()}))
             
             alertPresenter?.didAlertModelCreated(model: alertModel)
         } else {
@@ -136,6 +148,33 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
             
             self.questionFactory?.requestNextQuestion()
         }
+    }
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    private func hideLoadingIndicator() {
+        activityIndicator.stopAnimating()
+        activityIndicator.isHidden = true
+    }
+    
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator()
+        
+        let alertModel = AlertModel(title: "Ошибка",
+                                    message: message,
+                                    action: UIAlertAction(title: "Попробовать еще раз", style: .default, handler: { [weak self] _ in
+            guard let self = self else { return }
+            
+            self.currentQuestionIndex = 0
+            self.correctAnswers = 0
+            
+            questionFactory?.loadData()
+            showLoadingIndicator()}))
+        
+        alertPresenter?.didAlertModelCreated(model: alertModel)
     }
 }
 
