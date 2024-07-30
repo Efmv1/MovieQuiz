@@ -4,19 +4,24 @@ final class AlertPresenter {
     // MARK: - Public Properties
     weak var delegate: AlertPresenterDelegate?
     
-    // MARK: - Public Methods
+    
+    // MARK: - Initializers
+    init(delegate: AlertPresenterDelegate) {
+        self.delegate = delegate
+    }
+    
+    // MARK: - Public Methods    
     func didAlertModelCreated(model: AlertModel?) {
         let alert = UIAlertController(
             title: model?.title,
             message: model?.message,
             preferredStyle: .alert)
         
-        let action = UIAlertAction(title: "Сыграть еще раз", style: .default,
-                                   handler: {_ in
-            model?.completion()
-        })
+        guard let action = model?.action else {return}
         
         alert.addAction(action)
+        
+        alert.view.accessibilityIdentifier = "Alert"
         
         delegate?.showAlert(alert)
     }
