@@ -10,11 +10,7 @@ final class AlertPresenter {
         self.delegate = delegate
     }
     
-    // MARK: - Public Methods
-    func setup(delegate: AlertPresenterDelegate) {
-        self.delegate = delegate
-    }
-    
+    // MARK: - Public Methods    
     func didAlertModelCreated(model: AlertModel?) {
         let alert = UIAlertController(
             title: model?.title,

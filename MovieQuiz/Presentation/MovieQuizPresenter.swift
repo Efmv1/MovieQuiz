@@ -82,8 +82,8 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     }
     
     private func proceedToNextQuestionOrResults() {
-        if self.isLastQuestion() {
-            statistic?.store(correct: self.correctAnswers)
+        if isLastQuestion() {
+            statistic?.store(correct: correctAnswers)
             
             let alertModel = AlertModel(title: "Этот раунд окончен!",
                                         message: """
@@ -100,12 +100,12 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             
             alertPresenter?.didAlertModelCreated(model: alertModel)
         } else {
-            self.switchToNextQuestion()
-            self.questionFactory?.requestNextQuestion()
+            switchToNextQuestion()
+            questionFactory?.requestNextQuestion()
         }
     }
     
-    private func proceedWith(answer: Bool) {
+    private func proceed(with answer: Bool) {
         viewController?.highlightImageBorder(inCorrectColor: answer)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
@@ -136,6 +136,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         let givenAnswer = isCorrectAnswer == currentQuestion.correctAnswer
         correctAnswers = givenAnswer ? correctAnswers + 1 : correctAnswers
         
-        proceedWith(answer: givenAnswer)
+        proceed(with: givenAnswer)
     }
 }
